@@ -1,34 +1,15 @@
 from pathlib import Path
 import sqlite3
 
-from flask import Flask, jsonify, abort, request
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String
-
+from flask import Flask, jsonify, request, g, abort
 
 BASE_DIR = Path(__file__).parent
-path_to_db = BASE_DIR / 'quotes.db'
+DATABASE = "store.db"
+
 
 app = Flask(__name__)
-
-app.config['JSON_AS_ASCII'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{BASE_DIR / 'main.db'}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-class Base(DeclarativeBase):
-    pass
-db = SQLAlchemy(model_class=Base)
-db.init_app(app)
-class QuoteModel(db.Model):
-    __tablename__ = 'quotes'
-id: Mapped[int] = mapped_column(primary_key=True)
-author: Mapped[str] = mapped_column(String(32))
-text: Mapped[str] = mapped_column(String(255))
-def __init__(self, author, text):
-    self.author = author
-    self.text = text
+app.config["JSON_AS_ASCII"] = False
+path_to_db = BASE_DIR / "store.db"
 
 
 def make_dicts(cursor, row):
@@ -61,7 +42,6 @@ def get_unique_id(dct):
     ids = [i["id"] for i in dct]
     unique_id = sorted(ids)[-1] + 1
     return unique_id
-
 
 
 @app.route("/")
