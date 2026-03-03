@@ -1,0 +1,7 @@
+info:
+  name: Lesson01
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

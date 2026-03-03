@@ -1,0 +1,27 @@
+info:
+  name: Create new quote
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: 127.0.0.1:5000/quotes
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+          "author": "Tom",
+          "text": "Toms quote"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: Создание новой цитаты
