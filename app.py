@@ -1,6 +1,11 @@
 import random
+from pathlib import Path
+import sqlite3
 
 from flask import Flask, jsonify, request
+
+BASE_DIR = Path(__file__).parent
+path_to_db = BASE_DIR / "store.db"
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -11,33 +16,33 @@ def get_unique_id(dct):
     unique_id = sorted(ids)[-1] + 1
     return unique_id
 
-quotes = [
-   {
-       "rating": 1,
-       "id": 3,
-       "author": "Rick Cook",
-       "text": "Программирование сегодня — это гонка разработчиков программ, стремящихся писать программы с большей и лучшей идиотоустойчивостью, и вселенной, которая пытается создать больше отборных идиотов. Пока вселенная побеждает."
-   },
-   {
-       "rating": 1,
-       "id": 5,
-       "author": "Waldi Ravens",
-       "text": "Программирование на С похоже на быстрые танцы на только что отполированном полу людей с острыми бритвами в руках."
-   },
-   {
-       "rating": 1,
-       "id": 6,
-       "author": "Mosher’s Law of Software Engineering",
-       "text": "Не волнуйтесь, если что-то не работает. Если бы всё работало, вас бы уволили."
-   },
-   {
-       "rating": 1,
-       "id": 8,
-       "author": "Yoggi Berra",
-       "text": "В теории, теория и практика неразделимы. На практике это не так."
-   },
+# quotes = [
+#    {
+#        "rating": 1,
+#        "id": 3,
+#        "author": "Rick Cook",
+#        "text": "Программирование сегодня — это гонка разработчиков программ, стремящихся писать программы с большей и лучшей идиотоустойчивостью, и вселенной, которая пытается создать больше отборных идиотов. Пока вселенная побеждает."
+#    },
+#    {
+#        "rating": 1,
+#        "id": 5,
+#        "author": "Waldi Ravens",
+#        "text": "Программирование на С похоже на быстрые танцы на только что отполированном полу людей с острыми бритвами в руках."
+#    },
+#    {
+#        "rating": 1,
+#        "id": 6,
+#        "author": "Mosher’s Law of Software Engineering",
+#        "text": "Не волнуйтесь, если что-то не работает. Если бы всё работало, вас бы уволили."
+#    },
+#    {
+#        "rating": 1,
+#        "id": 8,
+#        "author": "Yoggi Berra",
+#        "text": "В теории, теория и практика неразделимы. На практике это не так."
+#    },
 
-]
+# ]
 
 @app.route("/")
 def hello_world():
@@ -45,7 +50,19 @@ def hello_world():
 
 @app.route("/quotes")
 def get_all_quotes():
-    return jsonify(quotes)
+    select_quotes = "SELECT * from quotes"
+    connection = sqlite3.connect("store.db")
+    cursor = connection.cursor()
+    cursor.execute(select_quotes)
+    quotes_db = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    keys = ('id', 'author', 'text')
+    quotes = [] 
+    for line in quotes_db:
+        quote = dict(zip(keys, line))
+        quotes.append(quote)
+    return jsonify(quotes), 200
 
 # Практика Часть 2 Дополнительно
 @app.route("/quotes/filter")
@@ -53,7 +70,7 @@ def get_filtered_quotes():
     filter = request.args.to_dict()
     filtered_quotes = []
     for quote in quotes:
-        if all([str(quote[key]) == value for key, value in filter.items()]):
+        if all([str(quote.get(key)) == value for key, value in filter.items()]):
             filtered_quotes.append(quote)
     return jsonify(filtered_quotes), 200
 
@@ -82,7 +99,7 @@ def get_random_quote():
 def create_quote():
     new_quote = request.json
     unique_id = get_unique_id(quotes)
-    new_quote ['id'] = unique_id
+    new_quote['id'] = unique_id
     if not 'rating' in new_quote.keys():
         new_quote['rating'] = 1
     quotes.append(new_quote)
