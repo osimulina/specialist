@@ -78,7 +78,11 @@ def get_quote(id):
     cursor = db.cursor()
     select_quotes = "SELECT * from quotes WHERE id=?"
     quotes_db = cursor.execute(select_quotes, (str(id),)).fetchone()
-    return jsonify(quotes_db) if len(quotes_db) != 0 else jsonify(data=f"Quote with id={id} not found"), 404
+    print(quotes_db)
+    if quotes_db:
+        return jsonify(quotes_db)
+    else:
+        return jsonify(data=f"Quote with id={id} not found"), 404
     
 
 
@@ -144,11 +148,9 @@ def edit_quote(id):
     db = get_db()
     cursor = db.cursor()
     attrs = set(new_quote.keys()) & {'author', 'text', 'rating'}
-    print(attrs)
     if 'rating' in new_quote and new_quote['rating'] > 5:
         new_quote['rating'] = 1
     query = f"UPDATE quotes SET {', '.join([attr + '=?' for attr in attrs])} WHERE id=?;"
-    print((tuple([new_quote[attr] for attr in attrs])+(id, )))
     cursor.execute(query, (tuple([new_quote[attr] for attr in attrs])+(id, )))   
     
     if cursor.rowcount == 0:

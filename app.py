@@ -46,11 +46,6 @@ class QuoteModel(db.Model):
                 "rating": self.rating}
 
 
-def get_unique_id(dct):
-    ids = [i["id"] for i in dct]
-    unique_id = sorted(ids)[-1] + 1
-    return unique_id
-
 
 @app.route("/")
 def hello_world():
@@ -69,16 +64,13 @@ def get_all_quotes():
 def get_filtered_quotes():
     """Фильтрация цитат"""
 
-    filters = request.args.to_dict()
-    query = "SELECT * FROM quotes WHERE 1=1"
-    values = []
-    allowed_fields = ["id", "author", "text", "rating"]
-    for key, value in filters.items():
-        if key in allowed_fields:
-            query += " AND {} = ?".format(key)
-            values.append(value)
-    quotes_db = query_db(query, values)
-    return jsonify(quotes_db), 200
+    author = request.args.get('author')
+    if author:
+        quotes = db.session.query(QuoteModel).filter_by(author=author).all()
+        quotes = [quote.to_dict() for quote in quotes]
+        return jsonify(quotes), 200
+    else:
+        return jsonify(message=f'Quotes by {filter} not found'), 404
 
 
 @app.route("/quotes/<int:id>")
@@ -104,7 +96,7 @@ def count_quotes():
 
 @app.route("/quotes/random")
 def get_random_quote():
-    """случаный выбор цитаты"""
+    """Cлучаный выбор цитаты"""
 
     random_quote = random.choice(db.session.scalars(db.select(QuoteModel)).all())
     return jsonify(random_quote.to_dict())
@@ -130,7 +122,6 @@ def create_quote():
     )
 
 
-# Практика Часть 2
 @app.route("/quotes/<int:id>", methods=["DELETE"])
 def delete_quote(id):
     """Удаление цитаты"""
