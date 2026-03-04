@@ -1,11 +1,11 @@
 info:
-  name: Delete quote
+  name: Delete author by id
   type: http
-  seq: 7
+  seq: 5
 
 http:
   method: DELETE
-  url: 127.0.0.1:5000/quotes/1
+  url: http://127.0.0.1:5000/authors/6
   headers:
     - name: Content-Type
       value: application/json
@@ -16,5 +16,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-
-docs: Удаление цитаты с id

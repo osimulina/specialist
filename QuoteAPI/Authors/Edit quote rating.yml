@@ -1,11 +1,11 @@
 info:
-  name: Get quote by id
+  name: Edit quote rating
   type: http
-  seq: 2
+  seq: 6
 
 http:
-  method: GET
-  url: 127.0.0.1:5000/quotes/1
+  method: PUT
+  url: http://127.0.0.1:5000/quotes/1/incrrr
   auth: inherit
 
 settings:
@@ -13,5 +13,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-
-docs: Получение цитаты по id

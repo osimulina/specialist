@@ -1,0 +1,25 @@
+info:
+  name: Author Post
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://127.0.0.1:5000/authors
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+          "name":"Alan", 
+          "surname": "Perlis"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

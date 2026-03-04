@@ -1,11 +1,11 @@
 info:
-  name: Filter quotes
+  name: Delete quote by id
   type: http
-  seq: 8
+  seq: 6
 
 http:
-  method: GET
-  url: ""
+  method: DELETE
+  url: http://127.0.0.1:5000/quotes/6
   auth: inherit
 
 settings:

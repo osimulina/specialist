@@ -1,11 +1,11 @@
 info:
-  name: Create new quote
+  name: Author update by id
   type: http
-  seq: 5
+  seq: 4
 
 http:
-  method: POST
-  url: 127.0.0.1:5000/quotes
+  method: PUT
+  url: http://127.0.0.1:5000/authors/1
   headers:
     - name: Content-Type
       value: application/json
@@ -13,8 +13,7 @@ http:
     type: json
     data: |-
       {
-          "author": "Tom",
-          "text": "Toms quote"
+          "name":"Ivan"
       }
   auth: inherit
 
@@ -23,5 +22,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-
-docs: Создание новой цитаты

@@ -1,11 +1,7 @@
 opencollection: 1.0.0
 
 info:
-  name: QuotesAPI(Flask1)
-
-docs:
-  content: API запросы для курса Flask1
-  type: text/markdown
+  name: QuoteAPI
 bundled: false
 extensions:
   bruno:

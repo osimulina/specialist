@@ -1,0 +1,24 @@
+info:
+  name: Create new quote to author
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://127.0.0.1:5000/authors/6/quotes
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+          "text": "Язык, который не меняет вашего представления о программировании, недостоин изучения"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
