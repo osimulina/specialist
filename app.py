@@ -3,18 +3,17 @@ import random
 
 from flask import Flask, jsonify, abort, request
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String
+from sqlalchemy import String, ForeignKey
+from flask_migrate import Migrate
 
 
 BASE_DIR = Path(__file__).parent
-path_to_db = BASE_DIR / "quotes.db"
 
 app = Flask(__name__)
-
 app.config["JSON_AS_ASCII"] = False
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{BASE_DIR / 'main.db'}"
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{BASE_DIR / 'quotes.db'}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
@@ -24,20 +23,31 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
+migrate = Migrate(app, db)
+
+class AuthorModel(db.Model):
+    __tablename__ = 'authors'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[int] = mapped_column(String(32), index= True, unique=True)
+    quotes: Mapped[list['QuoteModel']] = relationship( back_populates='author', lazy='dynamic')
+
+    def __init__(self, name):
+       self.name = name
 
 
 class QuoteModel(db.Model):
-    __tablename__ = "quotes"
+    __tablename__ = 'quotes'
+
     id: Mapped[int] = mapped_column(primary_key=True)
-    author: Mapped[str] = mapped_column(String(32))
+    author_id: Mapped[str] = mapped_column(ForeignKey('authors.id'))
+    author: Mapped['AuthorModel'] = relationship(back_populates='quotes')
     text: Mapped[str] = mapped_column(String(255))
-    rating: Mapped[str] = mapped_column(default=1)
+    rating: Mapped[int] = mapped_column(default=1)
 
-
-    def __init__(self, author, text, rating):
+    def __init__(self, author, text):
         self.author = author
-        self.text = text
-        self.rating = rating
+        self.text  = text
 
     def to_dict(self):
         return {"id": self.id,
@@ -63,10 +73,8 @@ def get_all_quotes():
 @app.route("/quotes/filter")
 def get_filtered_quotes():
     """Фильтрация цитат"""
-
-    author = request.args.get('author')
-    if author:
-        quotes = db.session.query(QuoteModel).filter_by(author=author).all()
+    if request.args:
+        quotes = db.session.query(QuoteModel).filter_by(**request.args).all()
         quotes = [quote.to_dict() for quote in quotes]
         return jsonify(quotes), 200
     else:
@@ -83,7 +91,7 @@ def get_quote(id):
     else:
         return jsonify(quote.to_dict()), 200
 
-
+  
 @app.route("/quotes/count")
 def count_quotes():
     """Количество цитат"""
