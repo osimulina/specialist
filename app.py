@@ -35,6 +35,9 @@ class AuthorModel(db.Model):
     def __init__(self, name):
        self.name = name
 
+    def to_dict(self):
+        return {"name": self.name}
+
 
 class QuoteModel(db.Model):
     __tablename__ = 'quotes'
@@ -51,7 +54,6 @@ class QuoteModel(db.Model):
 
     def to_dict(self):
         return {"id": self.id,
-                "author": self.author,
                 "text": self.text,
                 "rating": self.rating}
 
@@ -62,12 +64,14 @@ def hello_world():
     return jsonify(data="Hello, World!")
 
 
-@app.route("/quotes")
-def get_all_quotes():
+@app.route("/authors/<int:author_id>/quotes")
+def get_author_quotes(author_id):
     """Вывод всех цитат"""
-    quotes_db = db.session.scalars(db.select(QuoteModel)).all()
-    quotes = [quote_db.to_dict() for quote_db in quotes_db]
-    return jsonify(quotes), 200
+    author = db.session.get(AuthorModel, author_id)
+    quotes =[]
+    for quote in author.quotes:
+        quotes.append(quote.to_dict())
+    return jsonify(author=author.name, quotes=quotes), 200
 
 
 @app.route("/quotes/filter")
